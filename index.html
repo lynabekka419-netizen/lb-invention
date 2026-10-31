@@ -1,0 +1,577 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>موسوعة الاختراعات</title>
+
+<style>
+:root {
+  --primary: #2864a5;
+  --dark: #173454;
+  --light: #edf4fc;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  color: #26354b;
+}
+header {
+  background: linear-gradient(135deg,#173454,#347fc1);
+  color: white;
+  padding: 35px 20px;
+  text-align: center;
+}
+header h1 { margin: 0 0 12px; }
+nav {
+  background: white;
+  padding: 15px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  box-shadow: 0 2px 10px #0001;
+}
+nav a {
+  color: var(--dark);
+  text-decoration: none;
+  margin: 0 10px;
+  font-weight: bold;
+}
+.container { width: min(1050px,94%); margin: auto; }
+section { padding: 28px 0; }
+.section-title { color: var(--dark); }
+.search-box,.result-card,.assistant-card {
+  background: white;
+  padding: 22px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px #0001;
+  margin-top: 18px;
+}
+.search-row { display: flex; gap: 10px; }
+input,textarea {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #d5deea;
+  border-radius: 9px;
+  font-size: 16px;
+  font-family: inherit;
+}
+button {
+  background: var(--primary);
+  color: white;
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-size: 15px;
+}
+button:hover { background: #174b83; }
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+.category-btn {
+  background: white;
+  color: var(--dark);
+  border: 1px solid #d5deea;
+}
+.category-btn.active {
+  background: var(--primary);
+  color: white;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(190px,1fr));
+  gap: 18px;
+}
+.invention-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px #0001;
+  cursor: pointer;
+  transition: .2s;
+}
+.invention-card:hover { transform: translateY(-5px); }
+.invention-card img {
+  width: 100%;
+  height: 145px;
+  object-fit: cover;
+  background: var(--light);
+}
+.invention-card div { padding: 15px; }
+.invention-card h3 { color: var(--dark); margin: 0 0 8px; }
+.invention-card p { color: #64748b; margin: 0; font-size: 14px; }
+.info {
+  background: var(--light);
+  padding: 14px;
+  border-radius: 9px;
+  margin: 10px 0;
+  line-height: 1.7;
+}
+#photo {
+  display: none;
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 12px;
+  margin: 15px auto;
+}
+.timeline {
+  border-right: 3px solid #347fc1;
+  padding-right: 22px;
+}
+.timeline-item {
+  background: white;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px #0001;
+}
+.timeline-item strong { color: var(--primary); }
+#assistantAnswer { white-space: pre-wrap; line-height: 1.8; }
+footer {
+  text-align: center;
+  background: var(--dark);
+  color: white;
+  padding: 22px;
+  margin-top: 30px;
+}
+a { color: var(--primary); }
+@media(max-width:600px) {
+  nav a { margin: 0 5px; font-size: 12px; }
+  .search-row { flex-direction: column; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>📚 موسوعة الاختراعات</h1>
+  <p>اكتشفي أعظم الاختراعات التي غيّرت العالم</p>
+</header>
+
+<nav>
+  <a href="#home">الرئيسية</a>
+  <a href="#categories">التصنيفات</a>
+  <a href="#popular">الاختراعات</a>
+  <a href="#timeline">التاريخ</a>
+  <a href="#assistant">المساعد الذكي</a>
+</nav>
+
+<main class="container">
+
+<section id="home">
+  <h2 class="section-title">🔎 ابحثي عن اختراع</h2>
+  <div class="search-box">
+    <div class="search-row">
+      <input id="searchInput" placeholder="مثال: الهاتف، السيارة، المصباح..."
+        onkeydown="if(event.key==='Enter') searchInvention()">
+      <button onclick="searchInvention()">بحث</button>
+    </div>
+    <p id="status"></p>
+  </div>
+
+  <div class="result-card" id="result" hidden>
+    <h2 id="title"></h2>
+    <img id="photo" alt="صورة الاختراع">
+    <p id="summary"></p>
+    <div class="info"><b>👨‍🔬 المخترع:</b> <span id="inventor"></span></div>
+    <div class="info"><b>📅 سنة الاختراع:</b> <span id="year"></span></div>
+    <div class="info"><b>🌍 بلد أو مكان الإنشاء:</b> <span id="country"></span></div>
+    <a id="wikiLink" target="_blank" rel="noopener">قراءة المزيد في ويكيبيديا</a>
+  </div>
+</section>
+
+<section id="categories">
+  <h2 class="section-title">🗂️ تصفحي حسب التصنيف</h2>
+
+  <div class="category-list" id="categoryButtons">
+    <button class="category-btn active" data-category="الكل">🌍 جميع الاختراعات</button>
+    <button class="category-btn" data-category="الكهرباء">⚡ الكهرباء</button>
+    <button class="category-btn" data-category="النقل">🚗 وسائل النقل</button>
+    <button class="category-btn" data-category="التكنولوجيا">💻 التكنولوجيا</button>
+    <button class="category-btn" data-category="الطب">🏥 الطب</button>
+    <button class="category-btn" data-category="الفضاء">✈️ الطيران والفضاء</button>
+  </div>
+
+  <div class="cards" id="inventionCards"></div>
+</section>
+
+<section id="popular">
+  <h2 class="section-title">🌟 اكتشافات مميزة</h2>
+  <p>اختاري أي بطاقة لمعرفة المزيد عنها.</p>
+  <div class="cards" id="featuredCards"></div>
+</section>
+
+<section id="timeline">
+  <h2 class="section-title">🕰️ الخط الزمني للاختراعات</h2>
+  <div class="timeline">
+    <div class="timeline-item"><strong>حوالي 1450</strong><p>تطور الطباعة بالحروف المتحركة في أوروبا.</p></div>
+    <div class="timeline-item"><strong>1876</strong><p>براءة اختراع الهاتف المرتبطة بألكسندر غراهام بيل.</p></div>
+    <div class="timeline-item"><strong>1879</strong><p>تطوير مصابيح كهربائية عملية.</p></div>
+    <div class="timeline-item"><strong>1886</strong><p>سيارة كارل بنز ذات محرك البنزين.</p></div>
+    <div class="timeline-item"><strong>1903</strong><p>أول رحلة ناجحة لطائرة الأخوين رايت بمحرك.</p></div>
+  </div>
+</section>
+
+<section id="assistant">
+  <h2 class="section-title">🤖 المساعد الذكي</h2>
+  <div class="assistant-card">
+    <p>اسألي عن أي اختراع أو عن تاريخه ومخترعه.</p>
+    <textarea id="question" rows="3" placeholder="كيف تم اختراع المصباح الكهربائي؟"></textarea>
+    <br><br>
+    <button onclick="askAssistant()">إرسال السؤال</button>
+    <p id="assistantAnswer"></p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>📚 موسوعة الاختراعات</p>
+  <p>اكتشفي، تعلمي، وابتكري!</p>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const inventions = [
+  {
+    name: "المصباح الكهربائي",
+    category: "الكهرباء",
+    description: "اختراع ساهم في إضاءة العالم.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Thomas_Edison2.jpg"
+  },
+  {
+    name: "الهاتف",
+    category: "التكنولوجيا",
+    description: "وسيلة للتواصل الصوتي عن بعد.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Telephone%20exchange%20-%20Stockholm%20-%201890.jpg"
+  },
+  {
+    name: "السيارة",
+    category: "النقل",
+    description: "وسيلة نقل ساهمت في تغيير حياة الإنسان.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Benz%20Patent%20Motorwagen%20Nummer%201.jpg"
+  },
+  {
+    name: "الطائرة",
+    category: "الفضاء",
+    description: "وسيلة نقل تسمح بالسفر جوًا.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Wright%20Flyer%201903.jpg"
+  },
+  {
+    name: "الحاسوب",
+    category: "التكنولوجيا",
+    description: "جهاز لمعالجة المعلومات والبيانات.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Computer%20aj_aj_ashton_01.jpg"
+  },
+  {
+    name: "المجهر",
+    category: "الطب",
+    description: "أداة تساعد على رؤية الأشياء الدقيقة.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Microscope.jpg"
+  },
+  {
+    name: "التلسكوب",
+    category: "الفضاء",
+    description: "أداة لمشاهدة الأجرام السماوية البعيدة.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Antique%20telescope.jpg"
+  },
+  {
+    name: "المحرك البخاري",
+    category: "النقل",
+    description: "اختراع ساهم في الثورة الصناعية.",
+    image: "https://commons.wikimedia.org/wiki/Special:FilePath/Steam%20engine%20in%20the%20Science%20Museum%20London.jpg"
+  }
+];
+
+const presets = {
+  "السيارة": {
+    inventor: "كارل بنز (للسيارة العملية ذات محرك البنزين)",
+    year: "1886",
+    country: "ألمانيا (سيارة بنز الأولى)"
+  },
+  "الهاتف": {
+    inventor: "ألكسندر غراهام بيل (من أوائل أصحاب براءات الهاتف)",
+    year: "1876",
+    country: "الولايات المتحدة الأمريكية (براءة بيل)"
+  },
+  "المصباح الكهربائي": {
+    inventor: "ساهم عدة مخترعين في تطوير المصباح الكهربائي العملي، ومنهم توماس إديسون وجوزيف سوان",
+    year: "1879",
+    country: "الولايات المتحدة وبريطانيا، ضمن مراحل تطوير متعددة"
+  },
+  "الطائرة": {
+    inventor: "الأخوان أورفيل وويلبر رايت",
+    year: "1903",
+    country: "الولايات المتحدة الأمريكية"
+  }
+};
+
+function normalize(value) {
+  return value.trim()
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ة/g, "ه")
+    .replace(/ى/g, "ي")
+    .replace(/\s+/g, " ");
+}
+
+function renderCards(category = "الكل", target = "inventionCards") {
+  const list = category === "الكل"
+    ? inventions
+    : inventions.filter(item => item.category === category);
+
+  $(target).innerHTML = "";
+
+  if (!list.length) {
+    $(target).textContent = "لا توجد اختراعات في هذا التصنيف حاليًا.";
+    return;
+  }
+
+  list.forEach(item => {
+    const card = document.createElement("article");
+    card.className = "invention-card";
+
+    const img = document.createElement("img");
+    img.src = item.image;
+    img.alt = item.name;
+    img.loading = "lazy";
+
+    const content = document.createElement("div");
+    const heading = document.createElement("h3");
+    heading.textContent = item.name;
+
+    const description = document.createElement("p");
+    description.textContent = item.description;
+
+    content.append(heading, description);
+    card.append(img, content);
+    card.addEventListener("click", () => searchPreset(item.name));
+
+    $(target).append(card);
+  });
+}
+
+function setupCategories() {
+  document.querySelectorAll(".category-btn").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".category-btn")
+        .forEach(b => b.classList.remove("active"));
+
+      button.classList.add("active");
+      renderCards(button.dataset.category);
+    });
+  });
+}
+
+function searchPreset(name) {
+  $("searchInput").value = name;
+  searchInvention();
+  $("home").scrollIntoView({ behavior: "smooth" });
+}
+
+function showPreset(item) {
+  $("inventor").textContent = item.inventor;
+  $("year").textContent = item.year;
+  $("country").textContent = item.country;
+}
+
+async function getJSON(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("تعذر الاتصال بالمصدر");
+  return response.json();
+}
+
+async function getEntity(title) {
+  const url =
+    "https://www.wikidata.org/w/api.php?action=wbgetentities" +
+    "&sites=arwiki&titles=" + encodeURIComponent(title) +
+    "&props=claims&format=json&origin=*";
+
+  const data = await getJSON(url);
+
+  return Object.values(data.entities || {})
+    .find(item => item.id && item.id.startsWith("Q")) || null;
+}
+
+function getIds(claims, property) {
+  return (claims[property] || [])
+    .filter(c => c.rank !== "deprecated")
+    .map(c => c.mainsnak?.datavalue?.value?.id)
+    .filter(Boolean);
+}
+
+async function getLabels(ids) {
+  ids = [...new Set(ids)];
+  if (!ids.length) return {};
+
+  const data = await getJSON(
+    "https://www.wikidata.org/w/api.php?action=wbgetentities" +
+    "&ids=" + ids.join("|") +
+    "&props=labels&languages=ar|en&format=json&origin=*"
+  );
+
+  const labels = {};
+  for (const id of ids) {
+    const item = data.entities?.[id]?.labels;
+    labels[id] = item?.ar?.value || item?.en?.value || null;
+  }
+  return labels;
+}
+
+function getYear(claims) {
+  for (const property of ["P571", "P575", "P577"]) {
+    const claim = (claims[property] || [])
+      .find(c => c.rank !== "deprecated");
+    const time = claim?.mainsnak?.datavalue?.value?.time;
+    const match = time?.match(/[+-](\d{4})/);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+async function getDynamicInfo(title) {
+  const entity = await getEntity(title);
+
+  if (!entity) {
+    $("inventor").textContent = "غير متوفر في المصادر";
+    $("year").textContent = "غير متوفر في المصادر";
+    $("country").textContent = "غير متوفر في المصادر";
+    return;
+  }
+
+  const claims = entity.claims || {};
+  const inventorIds = [
+    ...getIds(claims, "P61"),
+    ...getIds(claims, "P170")
+  ];
+  const originIds = getIds(claims, "P495");
+  const placeIds = getIds(claims, "P1071");
+  const relatedIds = getIds(claims, "P17");
+
+  const labels = await getLabels([
+    ...inventorIds, ...originIds, ...placeIds, ...relatedIds
+  ]);
+
+  const inventors = [...new Set(inventorIds)]
+    .map(id => labels[id]).filter(Boolean);
+
+  $("inventor").textContent =
+    inventors.length ? inventors.join("، ") : "غير متوفر في المصادر";
+
+  $("year").textContent =
+    getYear(claims) || "غير متوفر في المصادر";
+
+  const origins = originIds.map(id => labels[id]).filter(Boolean);
+  const places = placeIds.map(id => labels[id]).filter(Boolean);
+  const related = relatedIds.map(id => labels[id]).filter(Boolean);
+
+  if (origins.length) {
+    $("country").textContent = "بلد المنشأ: " + origins.join("، ");
+  } else if (places.length) {
+    $("country").textContent = "مكان الإنشاء: " + places.join("، ");
+  } else if (related.length) {
+    $("country").textContent = "بلدان مرتبطة، وليست بالضرورة بلد المنشأ: " +
+      related.join("، ");
+  } else {
+    $("country").textContent = "غير متوفر في المصادر";
+  }
+}
+
+async function searchInvention() {
+  const query = $("searchInput").value.trim();
+
+  if (!query) {
+    $("status").textContent = "اكتبي اسم الاختراع أولًا.";
+    return;
+  }
+
+  $("status").textContent = "جارٍ البحث...";
+  $("result").hidden = true;
+  $("photo").style.display = "none";
+
+  try {
+    const data = await getJSON(
+      "https://ar.wikipedia.org/api/rest_v1/page/summary/" +
+      encodeURIComponent(query)
+    );
+
+    $("title").textContent = data.title || query;
+    $("summary").textContent = data.extract || "لا يوجد ملخص متاح.";
+    $("wikiLink").href = data.content_urls?.desktop?.page || "#";
+
+    if (data.thumbnail?.source) {
+      $("photo").src = data.thumbnail.source;
+      $("photo").style.display = "block";
+    }
+
+    $("result").hidden = false;
+    $("status").textContent = "";
+
+    const preset = Object.entries(presets).find(([name]) =>
+      normalize(name) === normalize(query) ||
+      normalize(name) === normalize(data.title)
+    );
+
+    if (preset) {
+      showPreset(preset[1]);
+    } else {
+      $("inventor").textContent = "جارٍ البحث...";
+      $("year").textContent = "جارٍ البحث...";
+      $("country").textContent = "جارٍ البحث...";
+      await getDynamicInfo(data.title);
+    }
+
+    $("result").scrollIntoView({ behavior: "smooth" });
+
+  } catch (error) {
+    console.error(error);
+    $("status").textContent = "حدث خطأ. حاولي كتابة اسم آخر.";
+  }
+}
+
+async function askAssistant() {
+  const question = $("question").value.trim();
+
+  if (!question) {
+    $("assistantAnswer").textContent = "اكتبي سؤالك أولًا.";
+    return;
+  }
+
+  $("assistantAnswer").textContent = "جارٍ التفكير...";
+
+  try {
+    const response = await fetch("/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error("فشل الطلب");
+
+    $("assistantAnswer").textContent =
+      data.answer || "لم تصل إجابة.";
+
+  } catch {
+    $("assistantAnswer").textContent =
+      "المساعد الذكي غير متصل حاليًا. يحتاج إلى إعداد مفتاح API صالح.";
+  }
+}
+
+setupCategories();
+renderCards("الكل");
+renderCards("الكل", "featuredCards");
+</script>
+
+</body>
+</html>
